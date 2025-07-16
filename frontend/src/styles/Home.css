@@ -30,7 +30,13 @@
 }
 
 .Home-link {
-  color: #61dafb;
+  color: #007bff;
+  cursor: pointer;
+}
+
+.Home-link:hover {
+  color: #0056b3;
+  cursor: pointer;
 }
 
 /* @keyframes App-logo-spin {

@@ -1,0 +1,17 @@
+/* Style the editor page to have the same theme as the Home page */
+.Editor {
+  background-color: #282c34;
+  min-height: 90vh;
+  padding: 10vh 10vb 0 10vb;
+  color: white;
+}
+
+/* Keep the color of the links in the Markdown cells consistent with the theme */
+.MarkdownCell a {
+  color: #007bff;
+}
+
+/* Style for the code to ensure the text is black */
+.CodeCell .cm-line {
+  color: black;
+}
