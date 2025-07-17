@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { ServiceManager, ServerConnection } from '@jupyterlab/services';
 import { v4 as uuidv4 } from 'uuid';
 
 import '../styles/Editor.css';
@@ -37,6 +36,8 @@ function Editor() {
 
   // State that holds the batch size chosen for the model in the application
   const [batchSize, setBatchSize] = useState(null);
+
+  const sessionIdRef = useRef(null);
 
   // Handler to update the cell with the output of the code block
 	const updateCellOutput = (cellIndex, newOutput) => {
@@ -88,25 +89,23 @@ function Editor() {
 
   // UseEffect to start the kernel upon rendering the editor
   useEffect(() => {
-    let serviceManager;
-
+    
     // Async function to start the kernel
     const startKernel = async () => {
       try {
-
-        // Configuration for the local Jupyter server
-        const serverSettings = ServerConnection.makeSettings({
-          baseUrl: 'http://localhost:8888',
-          token: '00211d24503f09ed4ba554ee6e7a4dc3432e6f1306b38f51',
-        });
         
-        serviceManager = new ServiceManager({ serverSettings: serverSettings });
-        await serviceManager.ready;
+        const response = await fetch('/api/kernel/start');
+
+        if (!response.ok) {
+          throw new Error(`Failed to start kernel: ${response.statusText}`);
+        }
 
         console.log("Starting new kernel...");
-        const newKernel = await serviceManager.kernels.startNew({ name: 'python3' });
-        setKernel(newKernel);
-        console.log("Kernel started:", newKernel.id);
+        const kernel_info = await response.json();
+
+        setKernel(kernel_info.sessionId);
+        sessionIdRef.current = kernel_info.sessionId;
+        console.log("Kernel started:", sessionIdRef.current);
 
       } catch (err) {
         console.error("Error starting the kernel:", err);
@@ -117,9 +116,25 @@ function Editor() {
 
     // Close the kernel when the editor component unmounts
     return () => {
-      console.log("Shutting down kernel...");
-      if (kernel) {
-        kernel.shutdown();
+      if (sessionIdRef.current) {
+        try {
+
+          fetch('/api/kernel/stop', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              sessionId: sessionIdRef.current
+            }),
+            keepalive: true
+          });
+
+          console.log("Shutting down kernel...");
+        }
+        catch (err) {
+          console.error('Error stopping kernel:', err);
+        }
       }
     };
   }, []);

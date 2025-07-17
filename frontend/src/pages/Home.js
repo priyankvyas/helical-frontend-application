@@ -25,28 +25,13 @@ function Home() {
   const fileInputRef = useRef(null);
 
   // Handler for when the user selects an option from the model dropdown
-	const handleApplicationDropdownChange = (event) => {
+	const handleApplicationDropdownChange = async (event) => {
 		setSelectedApplication(event.target.value);
-	};
-
-  // Handler for when the user chooses an existing application
-  const handleAppClick = async (event) => {
-    const selectedName = event.target.innerText;
     
-    // Find the corresponding path for the notebook file
-    var path = '';
-    for (let i = 0; i < availableApplications?.length; i++) {
-      if (availableApplications[i]?.name === selectedName) {
-        path = availableApplications[i]?.path;
-      }
-    }
-    
-    if (!path) return;
-
     // Asynchronously fetch the notebook file and update the state
     try {
       // Fetch the notebook file
-      const response = await fetch(path);
+      const response = await fetch(`/api/notebooks/${event.target.value}`);
 
       if (!response.ok) {
         throw new Error(`Failed to fetch notebook: ${response.statusText}`);
@@ -69,7 +54,7 @@ function Home() {
       console.error('Failed to load notebook:', error);
       alert('Could not load the selected notebook');
     }
-  };
+	};
 
   // Handler for when the user uploads a file
   const handleFileChange = (event) => {

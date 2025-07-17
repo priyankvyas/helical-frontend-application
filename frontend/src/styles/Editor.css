@@ -24,6 +24,11 @@
   color: black;
 }
 
+.CodeCell-output pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 .Sidebar {
   min-width: 280px;
   padding: 20px;

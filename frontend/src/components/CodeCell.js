@@ -11,24 +11,43 @@ function CodeCell({ cell, kernel, onExecute }) {
   const [outputs, setOutputs] = useState(cell.outputs || []);
 
   // Handler to execute the code within the code block
-  const handleExecute = () => {
-
+  const handleExecute = async () => {
     // Clear previous outputs in case the cell has been run before
     setOutputs([]);
+    
+    try {
 
-    // Send a request to the kernel of the notebook to execute the code
-    const future = kernel.requestExecute({ code });
-    future.onIOPub = (msg) => {
-      
+      // Send a request to the server to execute the code on the Jupyter kernel on the server
+      const response = await fetch('/api/kernel/execute', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          sessionId: kernel,
+          code: code
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to execute code: ${response.statusText}`);
+      }
+
+      const outputs = await response.json();
+      console.log(outputs);
+
       // Get the output of the code block from the kernel
-      const outputContent = msg.content.text;
+      const outputContent = outputs.output;
 
       // Update the output of the code block
       setOutputs((prev) => [...prev, outputContent]);
 
       // Update the state of the Editor to render the cell with its output
       onExecute(outputContent);
-    };
+    }
+    catch (err) {
+      console.error('Error executing the kernel:', err);
+    }
   };
 
   useEffect(() => {
