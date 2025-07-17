@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import logo from '../assets/logo.svg';
@@ -15,15 +15,19 @@ function Home() {
   // State to store information about the chosen application (notebook)
   const [notebookData, setNotebookData] = useState(null);
 
-  // Map of notebook files for example Helical applications
-  const notebookFiles = [
-    { id: 'Quick Start', name: './notebooks/Quick-Start-Tutorial.ipynb' },
-		{ id: 'Cell Type Annotation', name: './notebooks/Cell-Type-Annotation.ipynb' },
-    { id: 'Cell Type Classification Fine-Tuning', name: './notebooks/Cell-Type-Classification-Fine-Tuning.ipynb' },
-  ];
+  // State to hold the selected application by the user
+  const [selectedApplication, setSelectedApplication] = useState('');
+
+  // State to hold the list of available applications from the Helical repository
+  const [availableApplications, setAvailableApplications] = useState(null);
 
   // Ref to reset the file value on Render
   const fileInputRef = useRef(null);
+
+  // Handler for when the user selects an option from the model dropdown
+	const handleApplicationDropdownChange = (event) => {
+		setSelectedApplication(event.target.value);
+	};
 
   // Handler for when the user chooses an existing application
   const handleAppClick = async (event) => {
@@ -31,9 +35,9 @@ function Home() {
     
     // Find the corresponding path for the notebook file
     var path = '';
-    for (let i = 0; i < notebookFiles.length; i++) {
-      if (notebookFiles[i].id === selectedName) {
-        path = notebookFiles[i].name;
+    for (let i = 0; i < availableApplications?.length; i++) {
+      if (availableApplications[i]?.name === selectedName) {
+        path = availableApplications[i]?.path;
       }
     }
     
@@ -100,6 +104,25 @@ function Home() {
     setIsModalOpen(false);
   };
 
+  useEffect(() => {
+
+    const getAvailableApplications = async () => {
+      try {
+        const response = await fetch('/api/notebooks');
+        if (!response.ok) {
+          throw new Error('Could not get applications from the server');
+        }
+        const data = await response.json();
+        setAvailableApplications(data);
+      }
+      catch (error) {
+        console.error('Failed to fetch notebooks:', error);
+      }
+    };
+
+    getAvailableApplications();
+  }, []);
+
   return (
     <div className='Home'>
       <header className='Home-header'>
@@ -111,12 +134,25 @@ function Home() {
           To get started, choose one of the following applications:
         </p>
 
-        {/* List of example applications */}
-        {notebookFiles.map((application) => (
-          <p onClick={handleAppClick} className='Home-link' key={application.id}>
-            {application.id}
-          </p>
-        ))}
+        {/* Dropdown menu for the Notebook selection */}
+        <div className='Application'>
+          <select
+            className='Application-select'
+            value={selectedApplication}
+            onChange={handleApplicationDropdownChange}
+          >
+            <option value='' disabled>
+              -- Please choose an application --
+            </option>
+
+            {availableApplications?.map((application) => (
+              <option key={application.name} value={application.path}>
+                {application.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
         <p>
           OR
         </p>
