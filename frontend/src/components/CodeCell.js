@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { python } from '@codemirror/lang-python';
 
@@ -30,6 +30,21 @@ function CodeCell({ cell, kernel, onExecute }) {
       onExecute(outputContent);
     };
   };
+
+  useEffect(() => {
+    let parsedOutputs = [];
+    if (outputs.length !== 0) {
+        for (let i = 0; i < outputs.length; i++) {
+            if (outputs[i].data) {
+                parsedOutputs = [...parsedOutputs, outputs[i].data['text/plain'].join('\n')];
+            }
+            else {
+                parsedOutputs = [...parsedOutputs, outputs[i].text.join('\n')];
+            }
+        }
+        setOutputs(parsedOutputs);
+    }
+  }, []);
 
   return (
     <div className='CodeCell'>
