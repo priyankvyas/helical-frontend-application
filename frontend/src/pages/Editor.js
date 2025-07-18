@@ -63,10 +63,10 @@ function Editor() {
       'from helical.utils import get_anndata_from_hf_dataset\n',
       'ann_data = get_anndata_from_hf_dataset(dataset)\n',
       'ann_data\n',
-      `from helical.models.${model.id} import ${model.name}, ${model.name}Config\n`,
+      `from helical.models.${model?.id} import ${model?.name}, ${model?.name}Config\n`,
       `device = "${device}"\n`,
-      `model_config = ${model.name}Config(batch_size=${batchSize},device=device)\n`,
-      `model = ${model.name}(configurer=model_config)\n`
+      `model_config = ${model?.name}Config(batch_size=${batchSize},device=device)\n`,
+      `model = ${model?.name}(configurer=model_config)\n`
     ];
 
     // Create a new Code Cell

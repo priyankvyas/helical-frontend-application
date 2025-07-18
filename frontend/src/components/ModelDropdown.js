@@ -14,14 +14,18 @@ function ModelDropdown({ selectedModel, setSelectedModel }) {
   
   // Handler for when the user selects an option from the model dropdown
 	const handleModelDropdownChange = (event) => {
-		setSelectedModel(event.target.value);
+		const model = {
+      id: event.target.key,
+      name: event.target.value
+    };
+		setSelectedModel(model);
 	};
 
   return (
     <div className='Model'>
       <select
         className='Model-select'
-        value={selectedModel}
+        value={selectedModel?.name}
         onChange={handleModelDropdownChange}
       >
         <option value='' disabled>

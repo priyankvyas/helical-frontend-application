@@ -38,7 +38,7 @@ function DatasetDropdown({ selectedDataset, setSelectedDataset }) {
       };
 
       setDatasets([...datasets, newDataset]);
-			setSelectedDataset(newDataset.id);
+			setSelectedDataset(newDataset.name);
 			
 			// Reset the ref to allow the handler to be triggered again even if the file chosen is the same
 			if(fileInputRef.current) {
@@ -62,7 +62,7 @@ function DatasetDropdown({ selectedDataset, setSelectedDataset }) {
         <option value='upload'>Upload your own...</option>
 
         {datasets.map((dataset) => (
-          <option key={dataset.id} value={dataset.id}>
+          <option key={dataset.id} value={dataset.name}>
             {dataset.name}
           </option>
         ))}
