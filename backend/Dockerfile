@@ -16,4 +16,4 @@ RUN python -m ipykernel install --user --name="helical_env" --display-name="Pyth
 RUN pip install -r requirements.txt
 COPY . .
 
-CMD ['flask', 'run', '--host=0.0.0.0', '--port=5001']
+CMD flask run --host=0.0.0.0 --port=5001

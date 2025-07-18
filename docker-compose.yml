@@ -5,6 +5,8 @@ services:
       - "5001:5001"
     volumes:
       - ./backend:/app
+    env_file:
+      - ./.env
   frontend:
     build: ./frontend
     ports:
