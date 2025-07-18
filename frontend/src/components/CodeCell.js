@@ -10,8 +10,14 @@ function CodeCell({ cell, kernel, onExecute }) {
   // State to hold the outputs of the cell after execution
   const [outputs, setOutputs] = useState(cell.outputs || []);
 
+  // State to indicate if the cell is executing
+  const [isExecuting, setIsExecuting] = useState(false);
+
   // Handler to execute the code within the code block
   const handleExecute = async () => {
+    
+    setIsExecuting(true);
+
     // Clear previous outputs in case the cell has been run before
     setOutputs([]);
     
@@ -44,6 +50,7 @@ function CodeCell({ cell, kernel, onExecute }) {
 
       // Update the state of the Editor to render the cell with its output
       onExecute(outputContent);
+      setIsExecuting(false);
     }
     catch (err) {
       console.error('Error executing the kernel:', err);
@@ -72,7 +79,7 @@ function CodeCell({ cell, kernel, onExecute }) {
       <CodeMirror value={code} extensions={[python()]} onChange={(value) => setCode(value)} />
       
       {/* Run button to execute the code in the cell */}
-      <button onClick={handleExecute}>Run</button>
+      <button onClick={handleExecute}>{(!isExecuting) ? 'Run' : 'Running...'}</button>
 
       {/* Output div to display the output of the code in the cell */}
       <div className='CodeCell-output'>

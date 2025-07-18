@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -36,8 +36,6 @@ function Editor() {
 
   // State that holds the batch size chosen for the model in the application
   const [batchSize, setBatchSize] = useState(null);
-
-  const sessionIdRef = useRef(null);
 
   // Handler to update the cell with the output of the code block
 	const updateCellOutput = (cellIndex, newOutput) => {
@@ -89,6 +87,7 @@ function Editor() {
 
   // UseEffect to start the kernel upon rendering the editor
   useEffect(() => {
+    let currentSessionId = null;
     
     // Async function to start the kernel
     const startKernel = async () => {
@@ -104,8 +103,8 @@ function Editor() {
         const kernel_info = await response.json();
 
         setKernel(kernel_info.sessionId);
-        sessionIdRef.current = kernel_info.sessionId;
-        console.log("Kernel started:", sessionIdRef.current);
+        currentSessionId = kernel_info.sessionId;
+        console.log("Kernel started:", currentSessionId);
 
       } catch (err) {
         console.error("Error starting the kernel:", err);
@@ -116,24 +115,16 @@ function Editor() {
 
     // Close the kernel when the editor component unmounts
     return () => {
-      if (sessionIdRef.current) {
-        try {
-
-          fetch('/api/kernel/stop', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              sessionId: sessionIdRef.current
-            }),
-            keepalive: true
-          });
-
-          console.log("Shutting down kernel...");
+      if (currentSessionId) {
+        console.log('Shutting down kernel for session:', currentSessionId);
+        const body = new Blob([JSON.stringify({sessionId: currentSessionId})], {
+          type: 'application/json'
+        });
+        if (navigator.sendBeacon('/api/kernel/stop', body)) {
+          console.log('Kernel stopped:', currentSessionId);
         }
-        catch (err) {
-          console.error('Error stopping kernel:', err);
+        else {
+          console.error('Failed to queue shutdown request');
         }
       }
     };

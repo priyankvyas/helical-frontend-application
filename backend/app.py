@@ -60,7 +60,7 @@ def start_kernel_session():
         session_id = str(uuid.uuid4())
     
         # Initialize a Kernel Manager to start a Jupyter kernel
-        km = KernelManager()
+        km = KernelManager(kernel_name='helical_env')
         km.start_kernel()
 
         # Create a client to communicate with the kernel
@@ -94,7 +94,7 @@ def execute_code():
     outputs = []
     while True:
         try:
-            msg = kc.get_iopub_msg(timeout = 1)
+            msg = kc.get_iopub_msg(timeout = 5)
             print(msg)
             msg_type = msg['header']['msg_type']
             content = msg['content']
@@ -111,7 +111,7 @@ def execute_code():
                 break
         except Exception as e:
             print(str(e))
-            break
+            continue
     
     return jsonify({'output': ''.join(outputs)}), 200
 
